@@ -1655,6 +1655,11 @@ impl EffectcraftApp {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
         }
         self.run_script_tasks(&ctx);
+        // Help ▸ Check for Updates and the daily automatic check (when the host enables it).
+        self.session.poll_updates();
+        if matches!(self.session.update.state(), effectcraft_engine::update::State::Checking | effectcraft_engine::update::State::Downloading { .. }) {
+            ctx.request_repaint_after(std::time::Duration::from_millis(500));
+        }
         self.apply_prefs(&ctx);
         self.handle_events(&ctx);
         panels::unsaved::on_close_requested(self, &ctx);
@@ -1709,6 +1714,7 @@ impl EffectcraftApp {
         panels::scriptui_view::show_windows(self, &ctx);
         panels::learn::coach(self, &ctx);
         let lift = panels::media_panels::import_card(self, ui, full);
+        panels::update_card::show(self, ui, full);
         self.draw_toast(ui, full, lift);
         if self.session.config.is_some() && self.workspace_store.has_changes(&self.ui) && !ctx.input(|i| i.pointer.any_down()) {
             if self.workspace_store.due(ctx.input(|i| i.time)) {
@@ -1855,6 +1861,8 @@ impl eframe::App for EffectcraftApp {
         if self.device_lost_close != Some(true) {
             self.session.end_recovery();
         }
+        // After Restart to Update: the installer starts once this process is gone.
+        self.session.update.finish_on_exit();
     }
 
     fn raw_input_hook(&mut self, ctx: &egui::Context, raw_input: &mut egui::RawInput) {

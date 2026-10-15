@@ -10,11 +10,14 @@
 //!   `<file>.attribution` sidecar and an entry in `ATTRIBUTION.md` (AGENTS.md §1).
 //! - `ico <out.ico> <in.png>…`: pack PNGs into a Windows `.ico` (used by `packaging/icons.sh`).
 //! - `ci`: fmt check, clippy -D warnings, tests, layers, assets, wasm.
+//! - `update-keygen <secret-file>` / `update-manifest --version V --dir DIR --repo OWNER/NAME`:
+//!   the signed update manifest of a release (`update.rs`, docs/updates.md).
 //! - `bench [--bin CLI] [--quick] [--compare OLD.jsonl] …`: render benchmark of generated scenarios
 //!   (memory, CPU, wall time) into `target/bench/results.jsonl` (`bench.rs`, docs/testing.md).
 
 mod bench;
 mod ico;
+mod update;
 mod version;
 
 use std::process::{Command, ExitCode};
@@ -428,6 +431,7 @@ fn main() -> ExitCode {
             let rest: Vec<String> = std::env::args().skip(2).collect();
             ico::run(&rest.iter().map(String::as_str).collect::<Vec<_>>())
         }
+        "update-keygen" | "update-manifest" => update::run(&task, &std::env::args().skip(2).collect::<Vec<_>>()),
         "version" => {
             let rest: Vec<String> = std::env::args().skip(2).collect();
             version::run(&root(), &rest.iter().map(String::as_str).collect::<Vec<_>>())

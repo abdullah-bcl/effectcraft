@@ -905,6 +905,7 @@ const SIMPLIFIED_CHINESE: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "ArtCraft 网站"),
     ("help.appPage", "EffectCraft Home Page", "EffectCraft 主页"),
     ("help.github", "EffectCraft on GitHub", "GitHub 上的 EffectCraft"),
+    ("app.update.check", "Check for Updates...", "检查更新..."),
     ("file.openDemoProject", "Open Demo Project", "打开示例项目"),
 ];
 
@@ -1539,6 +1540,7 @@ const TRADITIONAL_CHINESE: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "ArtCraft 網站"),
     ("help.appPage", "EffectCraft Home Page", "EffectCraft 首頁"),
     ("help.github", "EffectCraft on GitHub", "GitHub 上的 EffectCraft"),
+    ("app.update.check", "Check for Updates...", "檢查更新..."),
     ("file.openDemoProject", "Open Demo Project", "開啟範例專案"),
 ];
 
@@ -2170,6 +2172,7 @@ const JAPANESE: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "ArtCraftウェブサイト"),
     ("help.appPage", "EffectCraft Home Page", "EffectCraftホームページ"),
     ("help.github", "EffectCraft on GitHub", "GitHubのEffectCraft"),
+    ("app.update.check", "Check for Updates...", "アップデートを確認..."),
     ("file.openDemoProject", "Open Demo Project", "デモプロジェクトを開く"),
 ];
 
@@ -2804,6 +2807,7 @@ const UKRAINIAN: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "Вебсайт ArtCraft"),
     ("help.appPage", "EffectCraft Home Page", "Домашня сторінка EffectCraft"),
     ("help.github", "EffectCraft on GitHub", "EffectCraft на GitHub"),
+    ("app.update.check", "Check for Updates...", "Перевірити наявність оновлень..."),
     ("file.openDemoProject", "Open Demo Project", "Відкрити демонстраційний проєкт"),
 ];
 
@@ -3439,6 +3443,7 @@ const SPANISH: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "Sitio web de ArtCraft"),
     ("help.appPage", "EffectCraft Home Page", "Página de inicio de EffectCraft"),
     ("help.github", "EffectCraft on GitHub", "EffectCraft en GitHub"),
+    ("app.update.check", "Check for Updates...", "Buscar actualizaciones..."),
     ("file.openDemoProject", "Open Demo Project", "Abrir proyecto de demostración"),
 ];
 
@@ -4072,6 +4077,7 @@ const PORTUGUESE: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "Site do ArtCraft"),
     ("help.appPage", "EffectCraft Home Page", "Página inicial do EffectCraft"),
     ("help.github", "EffectCraft on GitHub", "EffectCraft no GitHub"),
+    ("app.update.check", "Check for Updates...", "Verificar atualizações..."),
     ("file.openDemoProject", "Open Demo Project", "Abrir projeto de demonstração"),
 ];
 
@@ -4707,6 +4713,7 @@ const RUSSIAN: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "Сайт ArtCraft"),
     ("help.appPage", "EffectCraft Home Page", "Главная страница EffectCraft"),
     ("help.github", "EffectCraft on GitHub", "EffectCraft на GitHub"),
+    ("app.update.check", "Check for Updates...", "Проверить обновления..."),
     ("file.openDemoProject", "Open Demo Project", "Открыть демонстрационный проект"),
 ];
 
@@ -5340,6 +5347,7 @@ const FRENCH: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "Site web ArtCraft"),
     ("help.appPage", "EffectCraft Home Page", "Page d’accueil EffectCraft"),
     ("help.github", "EffectCraft on GitHub", "EffectCraft sur GitHub"),
+    ("app.update.check", "Check for Updates...", "Rechercher des mises à jour..."),
     ("file.openDemoProject", "Open Demo Project", "Ouvrir le projet de démonstration"),
 ];
 
@@ -5973,6 +5981,7 @@ const GERMAN: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "ArtCraft-Website"),
     ("help.appPage", "EffectCraft Home Page", "EffectCraft-Startseite"),
     ("help.github", "EffectCraft on GitHub", "EffectCraft auf GitHub"),
+    ("app.update.check", "Check for Updates...", "Nach Updates suchen..."),
     ("file.openDemoProject", "Open Demo Project", "Demoprojekt öffnen"),
 ];
 
@@ -6607,6 +6616,7 @@ const CZECH: &[(&str, &str, &str)] = &[
     ("help.website", "ArtCraft Website", "Web ArtCraft"),
     ("help.appPage", "EffectCraft Home Page", "Domovská stránka EffectCraft"),
     ("help.github", "EffectCraft on GitHub", "EffectCraft na GitHubu"),
+    ("app.update.check", "Check for Updates...", "Zkontrolovat aktualizace..."),
     ("file.openDemoProject", "Open Demo Project", "Otevřít ukázkový projekt"),
 ];
 

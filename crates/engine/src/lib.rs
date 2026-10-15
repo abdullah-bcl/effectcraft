@@ -44,6 +44,7 @@ pub mod storage;
 pub mod sysinfo;
 pub mod templates;
 pub mod tracking;
+pub mod update;
 pub mod vector;
 pub mod viewer;
 pub mod warp;
@@ -434,6 +435,8 @@ pub struct Session {
     pub models: models::Models,
     /// Where installed models live (hosts set it; else `models` next to the settings).
     pub models_dir: Option<std::path::PathBuf>,
+    /// Help ▸ Check for Updates and the automatic check (`update.rs`).
+    pub update: update::Updater,
     /// Roto Brush instances edited since their last propagation: (comp, layer, effect uid).
     pub roto_pending: Vec<(ItemId, LayerId, Uid)>,
     pub events: Vec<Event>,
@@ -573,6 +576,7 @@ impl Default for Session {
             roto_job: None,
             models: Default::default(),
             models_dir: None,
+            update: Default::default(),
             roto_pending: vec![],
             events: vec![],
             journal: vec![],

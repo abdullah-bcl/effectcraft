@@ -125,6 +125,9 @@ page!(Startup {
     /// graphics API) or `gl` (OpenGL, for drivers that crash with the others). A launch that
     /// stops as its window opens switches it to `gl` (#243).
     window_graphics: String = "auto".into(),
+    /// Check for a newer release at launch and once a day (`update.rs`; Windows installs it
+    /// after Restart to Update, other builds link to it).
+    check_for_updates: bool = true,
 });
 
 page!(ProjectPrefs {
@@ -1165,6 +1168,12 @@ pub fn pages() -> Vec<Page> {
                 s("startup.windowGraphics", "Window Graphics", Kind::Choice(WINDOW_GRAPHICS), true),
                 Note(
                     "Window Graphics applies from the next launch. When the graphics driver stops EffectCraft as its window opens, the next launch switches to OpenGL.",
+                ),
+                Section("Updates"),
+                s("startup.checkForUpdates", "Automatically Check for Updates", B, true),
+                Button { label: "Check for Updates Now", command: "app.update.check", params: "{}" },
+                Note(
+                    "On Windows, an update downloads in the background and installs when you choose Restart to Update. Other builds show a link to the new release.",
                 ),
                 Section("Repair"),
                 Button { label: "Reset Settings", command: "prefs.reset", params: "{}" },

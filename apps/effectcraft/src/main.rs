@@ -224,6 +224,9 @@ fn main() -> eframe::Result {
                 session.config = Some(std::sync::Arc::new(effectcraft_engine::config::DirConfig::new(dir)));
             }
             session.load_settings();
+            // Windows checks for updates at launch and daily (Settings ▸ Startup & Repair), unless
+            // an agent drives this window; macOS updates by hand (docs/updates.md).
+            session.update.auto = cfg!(target_os = "windows") && control_port.is_none();
             // Fit the window to its monitor, or put it back where it was (still hidden).
             let saved_window = session.config.as_deref().and_then(window::load);
             let opened = cc.winit_window().map(|w| window::restore(w, saved_window));

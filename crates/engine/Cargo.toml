@@ -36,4 +36,5 @@ log = { workspace = true }
 rayon = { workspace = true }
 image = { workspace = true }
 web-time = { workspace = true }
+ed25519-dalek = { workspace = true }
 exr = { workspace = true }

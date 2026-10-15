@@ -40,6 +40,7 @@ Commands (CLI, MCP, control channel):
 - `startup.showHomeOnLaunch`: Show Home Screen When Launching
 - `startup.offerCrashRecovery`: Offer to Open the Latest Auto-Save After a Crash
 - `startup.windowGraphics`: Window Graphics (`auto` / `gl`), what the desktop window draws with from the next launch. `auto` lets the platform pick (DirectX 12, Vulkan or Metal); `gl` uses OpenGL, with CPU compositing, for graphics drivers that crash with the others. A launch leaves a `launch-pending` marker in the settings folder until its window has been drawing for a few seconds (or the app quits normally before that); a launch that stops earlier (a graphics driver crashing as the window opens or as its surface is re-created) leaves the marker behind, and the next launch switches to `gl` and says so (not on macOS, which has no OpenGL backend). `WGPU_BACKEND` overrides both.
+- `startup.checkForUpdates`: Automatically Check for Updates. The desktop app checks the fork's latest release at launch and once a day (never when an agent drives it with `--control`). On Windows, installed with the MSI, a newer release downloads in the background, is verified (signed manifest, SHA-256) and installs after Restart to Update; the portable build, macOS and Linux get a link to the release (docs/updates.md).
 - `project.useTemplate`: New Project Loads Template
 - `project.templatePath`: Template Project
 - `autoSave.enabled`: Automatically Save Projects

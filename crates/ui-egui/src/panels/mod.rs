@@ -51,6 +51,7 @@ pub mod text_panels;
 pub mod timeline;
 pub mod tracker;
 pub mod unsaved;
+pub mod update_card;
 pub mod viewer;
 pub mod viewer_drop;
 pub mod viewer_overlays;

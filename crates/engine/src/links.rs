@@ -8,6 +8,10 @@ pub const WEBSITE: &str = "https://getartcraft.com";
 pub const APP_PAGE: &str = "https://getartcraft.com/apps/effectcraft";
 pub const GITHUB: &str = "https://github.com/storytold/effectcraft";
 pub const ISSUES: &str = "https://github.com/storytold/effectcraft/issues";
+/// Where this build's updates are published (the fork's GitHub Releases; `update.rs`).
+pub const RELEASES: &str = "https://github.com/abdullah-bcl/effectcraft/releases/latest";
+/// The newest release's signed manifest (`latest.json`, `latest.json.sig` beside it).
+pub const UPDATE_MANIFEST: &str = "https://github.com/abdullah-bcl/effectcraft/releases/latest/download/latest.json";
 
 /// Sibling apps of the ArtCraft family: (name, what it is, GitHub repo, app page).
 pub const SIBLINGS: &[(&str, &str)] = &[

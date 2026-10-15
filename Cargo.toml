@@ -53,6 +53,8 @@ log = "0.4"
 rayon = "1"
 # std::time::Instant/SystemTime on native; the browser clock on wasm32 (std's panic there).
 web-time = "1"
+# Update manifests are signed with Ed25519 (crates/engine/src/update.rs, xtask update-manifest).
+ed25519-dalek = { version = "2.2", default-features = false }
 gif = "0.14"
 proptest = "1"
 

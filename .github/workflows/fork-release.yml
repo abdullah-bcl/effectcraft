@@ -1,0 +1,183 @@
+# Every push to main builds macOS (universal DMG) and Windows (x64 MSI + portable zip) and
+# publishes them as the latest GitHub Release, with the signed update manifest (latest.json +
+# latest.json.sig) that installed Windows builds check for updates (crates/engine/src/update.rs).
+# Set up and operation: docs/updates.md.
+#
+# Self-contained on purpose: release.yml (upstream's, for the `release` branch) delegates to
+# storytold/craft-common-actions@main, which needs paid larger runners and drafts releases.
+name: Fork release
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "contributors/**"
+  workflow_dispatch:
+
+# A newer push supersedes a build in progress: only the newest main is released.
+concurrency:
+  group: fork-release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      date: ${{ steps.v.outputs.date }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # MAJOR.MINOR from Cargo.toml, PATCH from the run number: always increasing (the updater
+      # compares versions) and inside the MSI's limits (PATCH <= 65535).
+      - id: v
+        run: |
+          base=$(awk '/^\[/{p=($0=="[workspace.package]");next} p&&$1=="version"{gsub(/[" ]/,"",$3);print $3;exit}' Cargo.toml)
+          major_minor=$(echo "$base" | cut -d. -f1,2)
+          version="$major_minor.$(( GITHUB_RUN_NUMBER + 100 ))"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+          echo "EffectCraft $version (Cargo.toml: $base)"
+
+  macos:
+    needs: version
+    runs-on: macos-15
+    timeout-minutes: 120
+    env:
+      EFFECTCRAFT_VERSION: ${{ needs.version.outputs.version }}
+      EFFECTCRAFT_BUILD_DATE: ${{ needs.version.outputs.date }}
+      EFFECTCRAFT_BUILD_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # v1
+        with:
+          toolchain: stable
+          targets: aarch64-apple-darwin, x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: fork-release-macos
+      - name: Install resvg (DMG background)
+        run: command -v resvg || cargo install resvg --locked --version 0.48.1
+      - name: Set version
+        run: cargo xtask version set "$EFFECTCRAFT_VERSION"
+      # Optional: with a Developer ID in these secrets the app is signed and notarized; without
+      # them it is ad-hoc signed (first launch: right-click ▸ Open).
+      - name: Import signing certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: packaging/macos/import-cert.sh
+      - name: Build and package
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: packaging/macos/package.sh --arch universal
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-macos
+          path: dist/release/*
+          if-no-files-found: error
+      - name: Remove temporary keychain
+        if: always()
+        run: if [ -n "${MACOS_KEYCHAIN:-}" ]; then security delete-keychain "$MACOS_KEYCHAIN" || true; fi
+
+  windows:
+    needs: version
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      EFFECTCRAFT_VERSION: ${{ needs.version.outputs.version }}
+      EFFECTCRAFT_BUILD_DATE: ${{ needs.version.outputs.date }}
+      EFFECTCRAFT_BUILD_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # v1
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: fork-release-windows-x64
+      - name: Install WiX
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g "WixToolset.UI.wixext/5.0.2" "WixToolset.Util.wixext/5.0.2"
+      - name: Set version
+        shell: bash
+        run: cargo xtask version set "$EFFECTCRAFT_VERSION"
+      # Unsigned unless these secrets are set (sign.ps1 warns and carries on). Updates don't need
+      # it: the app verifies the signed manifest, and a curl download has no Mark-of-the-Web.
+      - name: Build and package
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: ./packaging/windows/package.ps1 -Arch x64
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-windows-x64
+          path: dist/release/*
+          if-no-files-found: error
+
+  publish:
+    needs: [version, macos, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      EFFECTCRAFT_BUILD_DATE: ${{ needs.version.outputs.date }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # v1
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: fork-release-publish
+      - name: Release notes (commits since the previous release)
+        run: |
+          prev=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
+          range=${prev:+$prev..}HEAD
+          git log --no-merges --pretty='- %s' "$range" | head -n 40 > notes.md
+          [ -s notes.md ] || echo "- Maintenance build" > notes.md
+          cat notes.md
+      - name: Signed update manifest
+        env:
+          UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+        run: |
+          if [ -z "$UPDATE_SIGNING_KEY" ]; then
+            echo "::error::UPDATE_SIGNING_KEY is not set: installed apps would refuse this release (docs/updates.md)"
+            exit 1
+          fi
+          cargo xtask update-manifest --version "$VERSION" --dir dist --repo "$GITHUB_REPOSITORY" --notes notes.md
+          (cd dist && sha256sum effectcraft* latest.json > SHA256SUMS.txt)
+          ls -l dist
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$VERSION" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "EffectCraft $VERSION" \
+            --notes-file notes.md \
+            --latest
